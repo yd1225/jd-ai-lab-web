@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0d121c">
+  <meta name="description" content="운동, 영어 학습, AI 프로젝트를 정리하는 개인 대시보드">
+  <title>JD AI Lab — Personal Dashboard</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0e16; --panel: #121925; --panel-2: #161f2c;
+      --line: #263142; --text: #f0f5f8; --muted: #94a3b6;
+      --accent: #b9ef6d; --cyan: #82ddec; --violet: #b9a5fa;
+      --shadow: 0 16px 48px rgba(0,0,0,.20);
+      font-family: Inter, Pretendard, "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * {box-sizing:border-box}
+    html {scroll-behavior:smooth}
+    body {margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55}
+    button,input,textarea {font:inherit}
+    button {cursor:pointer}
+    a {color:inherit;text-decoration:none}
+    button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible {outline:2px solid var(--accent);outline-offset:3px}
+    ::selection {background:#b9ef6d;color:#17210b}
+    .app {display:grid;grid-template-columns:236px minmax(0,1fr);min-height:100vh}
+    .sidebar {border-right:1px solid var(--line);padding:31px 20px;background:#0d131d;display:flex;flex-direction:column;gap:30px}
+    .brand {display:flex;align-items:center;gap:12px;padding-left:8px;font-size:15px;letter-spacing:.06em;font-weight:800}
+    .brand-mark {width:39px;height:39px;border-radius:13px;display:grid;place-items:center;background:var(--accent);color:#16240a;font-size:19px}
+    .brand small {display:block;font-size:10px;font-weight:650;letter-spacing:.15em;color:var(--muted)}
+    .nav-label,.eyebrow {text-transform:uppercase;letter-spacing:.15em;font-size:10px;font-weight:750;color:var(--muted)}
+    .nav-label {padding:0 12px;margin-bottom:12px}
+    .nav {display:grid;gap:6px}
+    .nav a {display:flex;align-items:center;gap:11px;border-radius:11px;padding:11px 12px;color:var(--muted);font-weight:600}
+    .nav a:hover,.nav a.active {background:#1a2531;color:var(--text)}
+    .nav a.active .nav-icon {color:var(--accent)}
+    .nav-icon {font-size:17px;width:23px;text-align:center}
+    .sidebar-bottom {margin-top:auto;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+    .status-dot {display:inline-block;width:7px;height:7px;background:var(--accent);border-radius:50%;margin-right:6px;box-shadow:0 0 10px #b9ef6d80}
+    .sidebar-bottom p {margin:6px 0 0;color:var(--muted);font-size:12px}
+    .content {width:100%;max-width:1360px;margin:0 auto;padding:36px clamp(20px,4.2vw,68px) 55px}
+    .topbar {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
+    .crumb {font-size:12px;font-weight:600;color:var(--muted)}
+    .crumb span {color:var(--text)}
+    .top-right {display:flex;align-items:center;gap:14px}
+    .date-pill {border:1px solid var(--line);border-radius:30px;padding:9px 14px;color:var(--muted);font-size:12px}
+    .avatar {width:35px;height:35px;border-radius:11px;background:var(--accent);display:grid;place-items:center;color:#13210b;font-size:12px;font-weight:900}
+    .hero {display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:28px}
+    .hero h1 {font-size:clamp(27px,3.1vw,42px);letter-spacing:-.055em;line-height:1.13;margin:8px 0 12px;font-weight:800}
+    .hero p {margin:0;color:var(--muted);font-size:14px}
+    .hero-accent {color:var(--accent)}
+    .button {display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:11px;padding:11px 16px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-weight:700;white-space:nowrap}
+    .button:hover {border-color:var(--accent)}
+    .button.primary {background:var(--accent);color:#18250e;border-color:var(--accent)}
+    .button.primary:hover {background:#d0ff90}
+    .button.ghost {background:transparent}
+    .cards {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+    .panel {background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    .metric {padding:21px;position:relative;overflow:hidden}
+    .metric-title {font-size:12px;color:var(--muted);font-weight:650}
+    .metric-value {font-size:35px;letter-spacing:-.06em;font-weight:800;margin:9px 0 4px;line-height:1.2}
+    .metric-note {color:var(--muted);font-size:11px}
+    .metric-icon {position:absolute;right:19px;top:18px;font-size:19px;color:var(--accent)}
+    .grid-main {display:grid;grid-template-columns:minmax(0,1.55fr) minmax(290px,1fr);gap:16px;margin-top:16px}
+    .card-body {padding:24px}
+    .section-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+    .section-heading h2 {font-size:16px;margin:4px 0 0;letter-spacing:-.02em}
+    .subtle {font-size:11px;color:var(--muted)}
+    .today-list {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .track {border:1px solid var(--line);background:var(--panel-2);color:var(--text);border-radius:14px;padding:17px 10px;text-align:left;min-height:151px;display:flex;flex-direction:column;gap:7px;transition:background .2s,border-color .2s}
+    .track:hover {border-color:#5f7961}
+    .track.done {background:#213021;border-color:#6b9857}
+    .track-icon {font-size:24px;margin-bottom:1px}
+    .track-name {font-weight:750;font-size:14px}
+    .track-action {font-size:11px;color:var(--muted);margin-top:auto}
+    .track.done .track-action {color:var(--accent)}
+    .ring-layout {display:flex;align-items:center;gap:23px}
+    .ring {--pct:0%;width:144px;height:144px;flex:none;border-radius:50%;background:conic-gradient(var(--accent) var(--pct),#2b3645 0);display:grid;place-items:center}
+    .ring-center {width:113px;height:113px;border-radius:50%;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .ring-center strong {font-size:32px;letter-spacing:-.06em}
+    .ring-center span {color:var(--muted);font-size:10px}
+    .ring-copy h3 {margin:0 0 8px;font-size:15px}
+    .ring-copy p {margin:0;color:var(--muted);font-size:12px}
+    .hint {margin-top:16px;border:1px dashed #354358;border-radius:12px;padding:11px 12px;font-size:11px;color:var(--muted)}
+    .secondary-grid {display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:16px;margin-top:16px}
+    .task-list {padding:0;margin:0;list-style:none;display:grid;gap:8px}
+    .task {display:flex;align-items:center;gap:10px;min-height:46px;padding:8px 10px;background:var(--panel-2);border:1px solid var(--line);border-radius:10px}
+    .task input[type=checkbox] {appearance:none;width:19px;height:19px;flex:none;border:1.5px solid #8091a8;border-radius:6px;cursor:pointer}
+    .task input[type=checkbox]:checked {background:var(--accent);border-color:var(--accent)}
+    .task input[type=checkbox]:checked::after {content:"✓";display:block;text-align:center;color:#1b280f;font-weight:900;line-height:16px}
+    .task span {flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px}
+    .task.done span {text-decoration:line-through;color:var(--muted)}
+    .task .remove {border:0;background:transparent;color:#8190a4;padding:4px 7px;border-radius:6px;font-size:16px}
+    .task .remove:hover {color:#ffb7ad;background:#423038}
+    .task-add {display:flex;gap:9px;margin-top:12px}
+    .task-add input {min-width:0;flex:1;background:#0c131d;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px 12px;outline:none}
+    .task-add input:focus {border-color:var(--accent)}
+    .task-add button {min-width:45px;border:0;border-radius:10px;background:var(--accent);color:#17240d;font-size:20px;font-weight:900}
+    .task-empty {padding:12px;color:var(--muted);font-size:12px;text-align:center}
+    .bars {height:150px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:end;gap:9px}
+    .bar-col {height:100%;display:flex;align-items:center;flex-direction:column;justify-content:end;gap:9px}
+    .bar-track {height:115px;width:100%;max-width:36px;border-radius:8px 8px 5px 5px;background:#202b39;display:flex;align-items:end;overflow:hidden}
+    .bar-fill {width:100%;height:0;background:linear-gradient(180deg,#cdfb8b,#92c65a);border-radius:7px 7px 0 0;min-height:0;transition:height .25s}
+    .bar-col.today .bar-track {outline:1px solid #5a7954;outline-offset:2px}
+    .bar-day {font-size:10px;color:var(--muted)}
+    .bar-col.today .bar-day {color:var(--accent);font-weight:800}
+    .bar-caption {display:flex;justify-content:space-between;margin-top:17px;font-size:11px;color:var(--muted)}
+    .projects {margin-top:17px}
+    .project-list {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .project {padding:21px;display:flex;flex-direction:column;gap:9px;min-height:160px}
+    .project-icon {width:39px;height:39px;border-radius:11px;display:grid;place-items:center;font-size:19px;background:#25392e;color:var(--accent)}
+    .project:nth-child(2) .project-icon {background:#233843;color:var(--cyan)}
+    .project:nth-child(3) .project-icon {background:#332e49;color:var(--violet)}
+    .project h3 {margin:3px 0 0;font-size:14px}
+    .project p {color:var(--muted);font-size:12px;margin:0;flex:1}
+    .project-foot {font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+    .bottom-grid {display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.65fr);gap:16px;margin-top:16px}
+    textarea {display:block;width:100%;height:122px;resize:vertical;background:#0c131d;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:14px;outline:none;font-size:13px;line-height:1.7}
+    textarea:focus {border-color:var(--accent)}
+    textarea::placeholder,.task-add input::placeholder {color:#718096}
+    .save-label {margin-top:10px;color:var(--muted);font-size:11px}
+    .archive {display:flex;flex-direction:column;justify-content:space-between;gap:14px}
+    .archive p {color:var(--muted);font-size:12px;margin:0}
+    .archive .button {align-self:start}
+    .footer {display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;color:#718096;font-size:11px;margin-top:24px}
+    .footer a {color:var(--accent)}
+    @media (max-width:1050px) {
+      .app {grid-template-columns:76px minmax(0,1fr)}
+      .sidebar {padding:27px 12px}
+      .brand {justify-content:center;padding:0}.brand-name,.nav-label,.nav-text,.sidebar-bottom {display:none}
+      .nav a {justify-content:center}.nav-icon {width:auto}
+      .grid-main {grid-template-columns:minmax(0,1fr)}
+      .ring-layout {justify-content:center}
+    }
+    @media (max-width:680px) {
+      .app {display:block}
+      .sidebar {height:64px;padding:10px 18px;border-right:0;border-bottom:1px solid var(--line);flex-direction:row;align-items:center;justify-content:space-between;gap:4px}
+      .brand {justify-content:start}.brand-name {display:block}
+      .sidebar nav,.sidebar .nav-label {display:none}
+      .content {padding:22px 15px 40px}
+      .topbar {margin-bottom:26px}
+      .hero {align-items:flex-start;flex-direction:column}
+      .cards {gap:8px}
+      .metric {padding:14px 12px}
+      .metric-value {font-size:26px}
+      .metric-icon {right:11px;top:10px;font-size:13px}
+      .metric-title {font-size:10px}
+      .metric-note {font-size:10px}
+      .card-body {padding:19px}
+      .today-list {gap:8px}
+      .track {padding:13px 9px;min-height:138px}
+      .track-name {font-size:12px}
+      .track-icon {font-size:21px}
+      .secondary-grid,.bottom-grid {grid-template-columns:1fr}
+      .project-list {grid-template-columns:1fr}
+      .project {min-height:115px}
+      .date-pill {padding:8px 9px;font-size:10px}
+    }
+    @media (max-width:360px) {
+      .cards {grid-template-columns:1fr}
+      .metric {min-height:92px}
+      .track {padding:10px 6px}
+      .ring {width:120px;height:120px}
+      .ring-center {width:94px;height:94px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">✦</span><span class="brand-name">JD AI LAB<small>PERSONAL WORKSPACE</small></span></div>
+    <nav aria-label="대시보드 탐색">
+      <div class="nav-label">Workspace</div>
+      <div class="nav">
+        <a class="active" href="#overview"><span class="nav-icon">◈</span><span class="nav-text">Overview</span></a>
+        <a href="#today"><span class="nav-icon">◉</span><span class="nav-text">Daily tracker</span></a>
+        <a href="#tasks"><span class="nav-icon">☷</span><span class="nav-text">Tasks</span></a>
+        <a href="#projects"><span class="nav-icon">⌘</span><span class="nav-text">Projects</span></a>
+        <a href="#notes"><span class="nav-icon">✎</span><span class="nav-text">Notes</span></a>
+      </div>
+    </nav>
+    <div class="sidebar-bottom"><strong><span class="status-dot"></span>Local workspace</strong><p>기록은 이 브라우저에만 저장됩니다. 클라우드에 자동 업로드되지 않습니다.</p></div>
+  </aside>
+
+  <main class="content" id="overview">
+    <div class="topbar">
+      <div class="crumb">Workspace &nbsp; / &nbsp; <span>Overview</span></div>
+      <div class="top-right"><div class="date-pill" id="currentDate">오늘</div><div class="avatar" aria-label="JD">JD</div></div>
+    </div>
+
+    <section class="hero" aria-labelledby="welcomeTitle">
+      <div><div class="eyebrow">Your space to build & grow</div><h1 id="welcomeTitle">작은 기록이 만드는<br><span class="hero-accent">큰 변화.</span></h1><p>운동, 영어, AI 프로젝트를 한 곳에서 가볍게 관리하세요.</p></div>
+      <a class="button primary" href="https://chatgpt.com/codex" target="_blank" rel="noopener noreferrer">Codex 열기 ↗</a>
+    </section>
+
+    <section class="cards" aria-label="요약 통계">
+      <article class="panel metric"><div class="metric-title">오늘 활동 완료</div><div class="metric-icon">✦</div><div class="metric-value"><span id="todayDone">0</span><span style="font-size:16px;color:var(--muted)"> / 3</span></div><div class="metric-note">운동 · 영어 · AI</div></article>
+      <article class="panel metric"><div class="metric-title">최근 7일 달성률</div><div class="metric-icon" style="color:var(--cyan)">↗</div><div class="metric-value" id="weekRate">0%</div><div class="metric-note">총 21개 활동 기준</div></article>
+      <article class="panel metric"><div class="metric-title">연속 활동 일수</div><div class="metric-icon" style="color:var(--violet)">◇</div><div class="metric-value"><span id="streakDays">0</span><span style="font-size:16px;color:var(--muted)">일</span></div><div class="metric-note">하루 1개 이상 완료 기준</div></article>
+    </section>
+
+    <div class="grid-main">
+      <section class="panel card-body" id="today" aria-labelledby="todayTitle">
+        <div class="section-heading"><div><div class="eyebrow">Daily check-in</div><h2 id="todayTitle">오늘의 세 가지 활동</h2></div><span class="subtle">버튼을 눌러 완료 표시</span></div>
+        <div class="today-list">
+          <button type="button" class="track" data-track="workout" aria-pressed="false"><span class="track-icon" aria-hidden="true">↗</span><span class="track-name">운동</span><span class="track-action">○ 완료 표시</span></button>
+          <button type="button" class="track" data-track="english" aria-pressed="false"><span class="track-icon" aria-hidden="true">✳</span><span class="track-name">영어</span><span class="track-action">○ 완료 표시</span></button>
+          <button type="button" class="track" data-track="ai" aria-pressed="false"><span class="track-icon" aria-hidden="true">⌘</span><span class="track-name">AI 프로젝트</span><span class="track-action">○ 완료 표시</span></button>
+        </div>
+        <div class="hint">시작용 기록판입니다. 운동 기록이나 Google Sheets와 아직 연동되어 있지 않아요.</div>
+      </section>
+
+      <section class="panel card-body" aria-labelledby="progressTitle">
+        <div class="section-heading"><div><div class="eyebrow">Today's progress</div><h2 id="progressTitle">오늘의 달성도</h2></div></div>
+        <div class="ring-layout">
+          <div class="ring" id="progressRing" role="img" aria-label="오늘 달성률 0%"><div class="ring-center"><strong id="progressPct">0%</strong><span>COMPLETED</span></div></div>
+          <div class="ring-copy"><h3 id="progressMessage">하나부터 시작해요.</h3><p id="progressDetail">작은 실천도 기록하면 쌓입니다.</p></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="secondary-grid">
+      <section class="panel card-body" id="tasks" aria-labelledby="taskTitle">
+        <div class="section-heading"><div><div class="eyebrow">Focus list</div><h2 id="taskTitle">오늘의 할 일</h2></div><span class="subtle" id="taskCount">0개 완료</span></div>
+        <ul class="task-list" id="taskList" aria-live="polite"></ul>
+        <form class="task-add" id="taskForm"><input id="taskInput" type="text" maxlength="100" placeholder="새 할 일 입력..." aria-label="새 할 일" required autocomplete="off"><button type="submit" aria-label="할 일 추가">+</button></form>
+        <p class="subtle">처음에는 예시 목표가 들어 있습니다. 자유롭게 삭제하거나 추가하세요.</p>
+      </section>
+      <section class="panel card-body" aria-labelledby="trendTitle">
+        <div class="section-heading"><div><div class="eyebrow">Last 7 days</div><h2 id="trendTitle">활동 기록 추이</h2></div><span class="subtle">하루 최대 3개</span></div>
+        <div class="bars" id="activityBars" aria-label="최근 7일 활동 막대그래프"></div>
+        <div class="bar-caption"><span>하루 활동 완료 수</span><span>운동 + 영어 + AI</span></div>
+      </section>
+    </div>
+
+    <section class="projects" id="projects" aria-labelledby="projectTitle">
+      <div class="section-heading"><div><div class="eyebrow">Next steps</div><h2 id="projectTitle">다음 AI 프로젝트 아이디어</h2></div><a class="subtle" href="https://github.com/yd1225/jd-ai-lab" target="_blank" rel="noopener noreferrer">GitHub 저장소 ↗</a></div>
+      <div class="project-list">
+        <article class="panel project"><div class="project-icon">↗</div><h3>Workout Tracker</h3><p>운동 로그를 가져와 중량과 반복 횟수의 변화를 시각화하기.</p><div class="project-foot">아이디어 · 미구현</div></article>
+        <article class="panel project"><div class="project-icon">✳</div><h3>English Practice</h3><p>매일 영어 표현, 팟캐스트 학습, 회화 연습 기록하기.</p><div class="project-foot">아이디어 · 미구현</div></article>
+        <article class="panel project"><div class="project-icon">⌘</div><h3>AI Automation</h3><p>반복되는 개인 작업을 Codex와 Python으로 자동화하기.</p><div class="project-foot">아이디어 · 미구현</div></article>
+      </div>
+    </section>
+
+    <div class="bottom-grid">
+      <section class="panel card-body" id="notes" aria-labelledby="notesTitle">
+        <div class="section-heading"><div><div class="eyebrow">Scratchpad</div><h2 id="notesTitle">자유 메모</h2></div></div>
+        <textarea id="memo" placeholder="오늘 떠오른 아이디어나 배운 점을 적어보세요." aria-label="자유 메모"></textarea>
+        <div class="save-label" id="saveStatus" role="status">입력 내용은 이 브라우저에 자동 저장됩니다.</div>
+      </section>
+      <section class="panel card-body archive" aria-labelledby="backupTitle">
+        <div><div class="eyebrow">My data</div><h2 id="backupTitle" style="font-size:16px;margin:5px 0 12px">기록 백업</h2><p>체크 기록과 메모는 브라우저에만 저장됩니다. 다른 기기에서도 쓰려면 JSON 파일로 백업해 두세요. GitHub와 자동 동기화되지는 않습니다.</p></div>
+        <button type="button" class="button ghost" id="exportBtn">↓ JSON 백업 내려받기</button>
+      </section>
+    </div>
+
+    <footer class="footer"><span>© JD AI LAB · First project with Codex & GitHub</span><span>Built as a self-contained HTML file · <a href="https://github.com/yd1225/jd-ai-lab" target="_blank" rel="noopener noreferrer">Source on GitHub ↗</a></span></footer>
+  </main>
+</div>
+<script>
+(function () {
+  'use strict';
+  var KEY = 'jd-ai-lab-dashboard-v1';
+  var categories = ['workout', 'english', 'ai'];
+  function localDate(date) {
+    return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+  }
+  function offsetDate(days) {
+    var d = new Date();
+    d.setHours(12, 0, 0, 0);
+    d.setDate(d.getDate() + days);
+    return localDate(d);
+  }
+  function today() { return localDate(new Date()); }
+  function defaults() {
+    return {
+      history: {},
+      tasks: [
+        {id: 1, text: '영어 팟캐스트 듣기', doneOn: ''},
+        {id: 2, text: '운동 기록 정리하기', doneOn: ''},
+        {id: 3, text: 'AI 프로젝트 아이디어 하나 적기', doneOn: ''}
+      ],
+      nextTaskId: 4,
+      memo: ''
+    };
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && parsed.history && Array.isArray(parsed.tasks)) {
+          parsed.memo = typeof parsed.memo === 'string' ? parsed.memo : '';
+          parsed.nextTaskId = Number.isSafeInteger(parsed.nextTaskId) ? parsed.nextTaskId : Math.max(0, ...parsed.tasks.map(function (t) {return Number(t.id) || 0;})) + 1;
+          return parsed;
+        }
+      }
+    } catch (e) { console.warn('저장된 데이터를 읽을 수 없습니다.', e); }
+    return defaults();
+  }
+  var state = load();
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch (e) { document.getElementById('saveStatus').textContent = '저장할 수 없습니다. 브라우저 저장 공간을 확인하세요.'; }
+  }
+  function dailyCount(key) {
+    var record = state.history[key] || {};
+    return categories.filter(function (c) { return record[c] === true; }).length;
+  }
+  function renderMetrics() {
+    var count = dailyCount(today());
+    var total = 0;
+    for (var i = -6; i <= 0; i++) total += dailyCount(offsetDate(i));
+    var rate = Math.round(total / 21 * 100);
+    var streak = 0;
+    var cursor = dailyCount(today()) ? 0 : -1;
+    while (dailyCount(offsetDate(cursor)) > 0 && streak < 3650) { streak++; cursor--; }
+    document.getElementById('todayDone').textContent = count;
+    document.getElementById('weekRate').textContent = rate + '%';
+    document.getElementById('streakDays').textContent = streak;
+    document.getElementById('progressPct').textContent = Math.round(count / 3 * 100) + '%';
+    var ring = document.getElementById('progressRing');
+    ring.style.setProperty('--pct', (count / 3 * 100) + '%');
+    ring.setAttribute('aria-label', '오늘 달성률 ' + Math.round(count / 3 * 100) + '%');
+    document.getElementById('progressMessage').textContent = count === 3 ? '오늘 목표 달성!' : count === 2 ? '한 가지만 더!' : count === 1 ? '좋은 출발이에요.' : '하나부터 시작해요.';
+    document.getElementById('progressDetail').textContent = count === 3 ? '운동, 영어, AI 활동을 모두 기록했습니다.' : '현재 ' + count + '개 완료 · 남은 활동 ' + (3 - count) + '개';
+    document.querySelectorAll('[data-track]').forEach(function (button) {
+      var marked = Boolean((state.history[today()] || {})[button.dataset.track]);
+      button.classList.toggle('done', marked);
+      button.setAttribute('aria-pressed', String(marked));
+      button.querySelector('.track-action').textContent = marked ? '✓ 완료됨 · 취소하려면 클릭' : '○ 완료 표시';
+    });
+  }
+  function renderBars() {
+    var chart = document.getElementById('activityBars');
+    chart.replaceChildren();
+    for (var i = -6; i <= 0; i++) {
+      var date = offsetDate(i);
+      var count = dailyCount(date);
+      var col = document.createElement('div'); col.className = 'bar-col' + (i === 0 ? ' today' : '');
+      var track = document.createElement('div'); track.className = 'bar-track';
+      var fill = document.createElement('div'); fill.className = 'bar-fill'; fill.style.height = (count / 3 * 100) + '%';
+      track.appendChild(fill);
+      var label = document.createElement('span'); label.className = 'bar-day';
+      label.textContent = i === 0 ? '오늘' : new Intl.DateTimeFormat('ko-KR', {weekday:'short'}).format(new Date(date + 'T12:00:00'));
+      col.title = date + ': ' + count + '/3 완료';
+      col.appendChild(track); col.appendChild(label); chart.appendChild(col);
+    }
+  }
+  function renderTasks() {
+    var list = document.getElementById('taskList');
+    list.replaceChildren();
+    var completed = 0;
+    state.tasks.forEach(function (task) {
+      var done = task.doneOn === today();
+      if (done) completed++;
+      var li = document.createElement('li'); li.className = 'task' + (done ? ' done' : '');
+      var check = document.createElement('input'); check.type = 'checkbox'; check.checked = done;
+      check.setAttribute('aria-label', task.text + ' 완료');
+      check.addEventListener('change', function () { task.doneOn = check.checked ? today() : ''; save(); renderTasks(); });
+      var span = document.createElement('span'); span.textContent = task.text;
+      var remove = document.createElement('button'); remove.type = 'button'; remove.className = 'remove'; remove.textContent = '×';
+      remove.setAttribute('aria-label', task.text + ' 삭제');
+      remove.addEventListener('click', function () {state.tasks = state.tasks.filter(function (t) { return t.id !== task.id; }); save(); renderTasks();});
+      li.appendChild(check);li.appendChild(span);li.appendChild(remove);list.appendChild(li);
+    });
+    if (!state.tasks.length) {
+      var empty = document.createElement('li'); empty.className = 'task-empty'; empty.textContent = '할 일을 추가해 보세요.'; list.appendChild(empty);
+    }
+    document.getElementById('taskCount').textContent = completed + ' / ' + state.tasks.length + '개 완료';
+  }
+  function renderAll() {renderMetrics();renderBars();renderTasks();}
+  document.getElementById('currentDate').textContent = new Intl.DateTimeFormat('ko-KR', {year:'numeric',month:'long',day:'numeric',weekday:'short'}).format(new Date());
+  document.querySelectorAll('[data-track]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var key = today();
+      if (!state.history[key]) state.history[key] = {};
+      var kind = button.dataset.track;
+      state.history[key][kind] = !state.history[key][kind];
+      save(); renderAll();
+    });
+  });
+  document.getElementById('taskForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = document.getElementById('taskInput');
+    var text = input.value.trim();
+    if (!text) return;
+    state.tasks.push({id: state.nextTaskId++, text: text.slice(0,100), doneOn:''});
+    input.value = ''; save();renderTasks();input.focus();
+  });
+  var memo = document.getElementById('memo');
+  memo.value = state.memo;
+  memo.addEventListener('input', function () {
+    state.memo = memo.value;
+    save();
+    document.getElementById('saveStatus').textContent = '현재 브라우저에 저장됨 ✓';
+  });
+  document.getElementById('exportBtn').addEventListener('click', function () {
+    var data = JSON.stringify({version:1,exportedAt:new Date().toISOString(),data:state},null,2);
+    var blob = new Blob([data],{type:'application/json;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a'); a.href = url; a.download = 'jd-ai-lab-backup-' + today() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () {URL.revokeObjectURL(url);}, 1000);
+  });
+  renderAll();
+})();
+</script>
+</body>
+</html>
